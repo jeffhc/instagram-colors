@@ -1,7 +1,0 @@
-
-Saving Images and editing metadata
-
-https://stackoverflow.com/questions/8586940/writing-complex-custom-metadata-on-images-through-python
-https://stackoverflow.com/questions/8286352/how-to-save-an-image-locally-using-python-whose-url-address-i-already-know
-http://alazycoder.com/edit-exif-data-using-python/
-http://piexif.readthedocs.io/en/latest/helper.html#usercomment

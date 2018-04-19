@@ -28,7 +28,7 @@ def get_photos(username, followers):
 	for node in nodes:
 		post = {
 			"url": node['node']['thumbnail_resources'][4]['src'],
-			"likes": node['node']['edge_liked_by'],
+			"likes": node['node']['edge_liked_by']['count'],
 			"user": username,
 			"ratio": node['node']['edge_liked_by']['count']/int(followers) # Likes to follower ratios
 		}
@@ -54,24 +54,29 @@ users = []
 with open('user_list.csv', newline='') as csvfile:
 	csv = csv.reader(csvfile, delimiter=',')
 	for row in csv: # Cycle thru users
-		user_posts = get_photos(row[0], row[1])
-		counter = 1
-		for post in user_posts:
-			filename = 'photos/%s_%d.jpg' % (post['user'], counter)
-			urllib.request.urlretrieve(post['url'], filename) # Save photos from URL
-			time.sleep(2) # PREVENT US FROM GETTING BLOCKED
-			#### WRITE METADATA
-			exif_dict = get_exif_data(filename)
- 
-			if exif_dict is not 0:
-				exif_dict['0th'][piexif.ImageIFD.Copyright] = "test"
-				exif_dict['0th'][piexif.ImageIFD.Artist] = "test"
-				exif_dict["Exif"][piexif.ExifIFD.UserComment] = piexif.helper.UserComment.dump(json.dumps(post))
-			 
-				exif_bytes = piexif.dump(exif_dict)
-				piexif.insert(exif_bytes, filename)
-			else:
-				print("Was not able to open " + image)
-			####
-			counter += 1
-		print("Finished %s" % row[0])
+		try:
+			user_posts = get_photos(row[0], row[1])
+			counter = 1
+			for post in user_posts:
+				filename = 'photos/%s_%d.jpg' % (post['user'], counter)
+				urllib.request.urlretrieve(post['url'], filename) # Save photos from URL
+				time.sleep(2) # PREVENT US FROM GETTING BLOCKED
+				#### WRITE METADATA
+				exif_dict = get_exif_data(filename)
+	 
+				if exif_dict is not 0:
+					exif_dict['0th'][piexif.ImageIFD.Copyright] = "test"
+					exif_dict['0th'][piexif.ImageIFD.Artist] = "test"
+					exif_dict["Exif"][piexif.ExifIFD.UserComment] = piexif.helper.UserComment.dump(json.dumps(post))
+				 
+					exif_bytes = piexif.dump(exif_dict)
+					piexif.insert(exif_bytes, filename)
+				else:
+					print("Was not able to open " + filename)
+				####
+				counter += 1
+			print("Finished %s" % row[0])
+		except:
+			print("Can't get photos for " + str(row[0]))
+			with open("invalid_users.txt", 'a') as file:
+				file.write("%s\n" % row[0])
