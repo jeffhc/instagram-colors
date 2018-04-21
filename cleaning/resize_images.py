@@ -17,7 +17,13 @@ if not os.path.exists(SCALED_PHOTO_DIR):
     os.makedirs(SCALED_PHOTO_DIR)
 
 # Resize and save images
+counter = 0
 for file in onlyfiles:
 	img = Image.open(join(RAW_PHOTO_DIR, file))
 	img = img.resize(INTENDED_SIZE, PIL.Image.ANTIALIAS)
 	img.save(join(SCALED_PHOTO_DIR, file[:-4] + "_r.jpg"))
+
+	print(counter)
+	counter += 1
+	with open('resize_info.txt', 'w') as file:
+		file.write(str(file))
