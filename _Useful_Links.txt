@@ -11,3 +11,6 @@ Problems with too many web requests
 https://stackoverflow.com/questions/49718857/python-webcrawling-urllib-error-urlerror-urlopen-error-temporary-failure-in-na
 https://codereview.stackexchange.com/questions/166915/downloading-images-from-urls
 http://docs.python-requests.org/en/master/user/advanced/#session-objects
+
+
+https://datascience.stackexchange.com/questions/16807/why-mini-batch-size-is-better-than-one-single-batch-with-all-training-data
