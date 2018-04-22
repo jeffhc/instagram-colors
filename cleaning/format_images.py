@@ -25,8 +25,6 @@ all_data = {
 	"user": []
 }
 
-#pickle.dump(all_data, "doe.pickle")
-
 for imgname in onlyfiles:
 	img = Image.open(join(IMAGE_DATA_DIR,imgname))
 	img.load()
@@ -42,13 +40,9 @@ for imgname in onlyfiles:
 	all_data["user"].append(metadata["user"])
 
 
-pprint.pprint(all_data)
+#pprint.pprint(all_data)
 
-"""
-all_data = {
-	
-	photos: [np.array(), np.array(), ],
-	likes: []
-}
+pickle.dump(all_data, open("all_data.pickle", 'wb'))
 
-pickle.dump(all_data, "doe.pickle")"""
+#data = pickle.load(open("all_data.pickle", 'rb'))
+#pprint.pprint(data)
