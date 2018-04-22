@@ -24,22 +24,27 @@ all_data = {
 for imgname in onlyfiles:
 	filepath = join(IMAGE_DATA_DIR, imgname)
 	
-	img = Image.open(imgname)
-	img.load()
-	data = np.asarray( img, dtype="int32" )
-	all_data["photos"].append(data)
+	try:
+		img = Image.open(filepath)
+		img.load()
+		data = np.asarray( img, dtype="int32" )
+		all_data["photos"].append(data)
 
-	exif_dict = piexif.load(filepath)
-	user_comment = piexif.helper.UserComment.load(exif_dict["Exif"][piexif.ExifIFD.UserComment])
-	metadata = json.loads(user_comment)
-	
-	all_data["likes"].append(metadata["likes"])
-	all_data["ratio"].append(metadata["ratio"])
-	all_data["url"].append(metadata["url"])
-	all_data["user"].append(metadata["user"])
+		exif_dict = piexif.load(filepath)
+		user_comment = piexif.helper.UserComment.load(exif_dict["Exif"][piexif.ExifIFD.UserComment])
+		metadata = json.loads(user_comment)
+		
+		all_data["likes"].append(metadata["likes"])
+		all_data["ratio"].append(metadata["ratio"])
+		all_data["url"].append(metadata["url"])
+		all_data["user"].append(metadata["user"])
+	except:
+		print("Could not pickle: " + filepath)
+		with open('pickle_error_log.txt', 'a') as f:
+			f.write(filepath + '\n')
 
 
-
+print("Done")
 pickle.dump(all_data, open("all_data.pickle", 'wb'))
 
 
