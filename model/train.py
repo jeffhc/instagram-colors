@@ -9,7 +9,6 @@ import pickle
 import os
 import sys
 
-
 VGG_PATH = 'imagenet-vgg-verydeep-19.mat'
 TOTAL_IMAGES = 12
 BATCH_SIZE = 3

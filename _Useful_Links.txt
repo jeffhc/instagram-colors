@@ -14,3 +14,11 @@ http://docs.python-requests.org/en/master/user/advanced/#session-objects
 
 
 https://datascience.stackexchange.com/questions/16807/why-mini-batch-size-is-better-than-one-single-batch-with-all-training-data
+https://stats.stackexchange.com/questions/211436/why-do-we-normalize-images-by-subtracting-the-datasets-image-mean-and-not-the-c?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
+
+
+ConvNets:
+https://www.quora.com/In-the-VGG-16-and-VGG-19-architectures-why-are-there-more-consecutively-stacked-3x3-convolutional-layers-in-the-high-layers-than-the-lower-layers
+http://cv-tricks.com/cnn/understand-resnet-alexnet-vgg-inception/
+https://towardsdatascience.com/an-overview-of-resnet-and-its-variants-5281e2f56035
