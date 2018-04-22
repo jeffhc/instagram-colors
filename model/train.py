@@ -54,26 +54,20 @@ def general_convolution(input, layer_name):
 
     return tf.nn.relu(convolution + biases)
 
-
+# Convolve: After convolving, shape is (40, 40, 3)
 relu1 = general_convolution(images, 'relu1')
-print(relu1.shape)
 relu2 = general_convolution(relu1, 'relu2')
-print(relu2.shape)
 relu3 = general_convolution(relu2, 'relu3')
-print(relu3.shape)
 relu4 = general_convolution(relu3, 'relu4')
-print(relu4.shape)
 
-
-# Flatten convolved image
-image_size = np.prod(images_pre.shape[1:])
-images_pre = tf.reshape(images_pre, [-1, image_size])
+# Flatten convolved image. Gives (?, 4800)
+flattended_size = np.prod(relu4.shape[1:])
+relu4 = tf.reshape(relu4, [-1, flattended_size])
 
 # Fully connected network to produce number of likes
-images_pre_size = int(images_pre.shape[1])
-fc_weights0 = tf.Variable(tf.truncated_normal([images_pre_size, 5000]), name='fc_weights0')
+fc_weights0 = tf.Variable(tf.truncated_normal([int(flattended_size), 5000]), name='fc_weights0')
 fc_biases0 = tf.Variable(tf.constant(0.1, shape=(5000,)), name='fc_biases0')
-fc0 = tf.nn.relu(tf.matmul(images_pre, fc_weights0) + fc_biases0)
+fc0 = tf.nn.relu(tf.matmul(relu4, fc_weights0) + fc_biases0)
 
 fc_weights1 = tf.Variable(tf.truncated_normal([int(fc0.shape[1]), 1]), name='fc_weights1')
 fc_biases1 = tf.Variable(tf.constant(0.1, shape=(1,)), name='fc_biases1')
