@@ -1,6 +1,6 @@
 from PIL import Image
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile, join, exists
 
 
 PHOTO_DIR = 'photos'
