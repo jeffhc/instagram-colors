@@ -9,8 +9,12 @@ import piexif, piexif.helper, json, pprint
 
 
 IMAGE_DATA_DIR = 'scaled_photos'
+PICKLE_DIR = 'pickles'
 onlyfiles = [f for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
 
+# Check if pickle directory exists
+if not os.path.exists(PICKLE_DIR):
+    os.makedirs(PICKLE_DIR)
 
 pickle_count = 0
 pickle_limit = 42
@@ -55,7 +59,7 @@ while pickle_count < pickle_limit:
 
 	pickle_count += 1
 	print("Done with %d000" % pickle_count)
-	pickle.dump(all_data, open("data_%s.pickle" & pickle_count, 'wb'))
+	pickle.dump(all_data, open(join(PICKLE_DIR, "data_%s.pickle" & pickle_count), 'wb'))
 
 
 #data = pickle.load(open("all_data.pickle", 'rb'))
