@@ -29,19 +29,45 @@ def biases_variable(shape, name):
     return tf.Variable(tf.constant(0.1, shape=shape), name=name)
 
 
-
 # Placeholder variables
 images = tf.placeholder(tf.float32, shape=(None, 640, 640, 3), name='images')
 likes = tf.placeholder(tf.float32, shape=(None, 1), name='likes')
 
 ### Preprocess images using VGG. Code borrowed and modified from https://github.com/lengstrom/fast-style-transfer
-images_pre = vgg.preprocess(images) # TODO: Wtf is this doing? or rather... Is this the mean of the VGG dataset or OUR dataset?
-net = vgg.net(VGG_PATH, images_pre)
+#images_pre = vgg.preprocess(images) # TODO: Wtf is this doing? or rather... Is this the mean of the VGG dataset or OUR dataset?
+#net = vgg.net(VGG_PATH, images_pre)
+#images_vgg = net['relu5_4'] # TODO: Has the image been through the VGG_net?
+#print(images_vgg.shape)
 
-# Flatten images
+
+# Take last layer of net and convolve it
+def general_convolution(input, layer_name):
+    "Performs a 5x5 convolution on `input` with a stride length of 2 (halves input image size)"
+    "Input and output channels are both 1"
+    weights = weights_variable([5, 5, 3, 3], '%s_weights' % layer_name)
+    convolution = tf.nn.conv2d(input, filter=weights, strides=[1, 2, 2, 3], padding='SAME')
+
+    output_width = int(convolution.shape[1])
+    output_height = int(convolution.shape[2])
+
+    biases = biases_variable([output_width, output_height, 1], '%s_biases' % layer_name)
+
+    return tf.nn.relu(convolution + biases)
+
+
+relu1 = general_convolution(images, 'relu1')
+print(relu1.shape)
+relu2 = general_convolution(relu1, 'relu2')
+print(relu2.shape)
+relu3 = general_convolution(relu2, 'relu3')
+print(relu3.shape)
+relu4 = general_convolution(relu3, 'relu4')
+print(relu4.shape)
+
+
+# Flatten convolved image
 image_size = np.prod(images_pre.shape[1:])
 images_pre = tf.reshape(images_pre, [-1, image_size])
-# images_pre shape: (?, 1228800)
 
 # Fully connected network to produce number of likes
 images_pre_size = int(images_pre.shape[1])
