@@ -14,7 +14,7 @@ TOTAL_IMAGES = 12
 BATCH_SIZE = 3
 LEARNING_RATE = 1e-3
 
-#all_data = pickle.load(open('all_data.pickle', 'rb'))
+all_data = pickle.load(open('all_data.pickle', 'rb'))
 
 def chunks(array, chunk_size):
     """Yield successive n-sized chunks from l."""

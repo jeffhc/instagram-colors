@@ -30,24 +30,24 @@ for file in onlyfiles:
 	filepath = join(RAW_PHOTO_DIR,file)
 	new_filepath = join(SCALED_PHOTO_DIR, file[:-4] + "_r.jpg")
 	img = Image.open(filepath)
-	img = img.resize(INTENDED_SIZE, PIL.Image.ANTIALIAS)
+	if (img.size) != INTENDED_SIZE:
+		img = img.resize(INTENDED_SIZE, PIL.Image.ANTIALIAS)
 	img.save(new_filepath)
 	
-	exif_dict = get_exif_data(new_filepath)
-	 
-	if exif_dict is not 0:
-		exif_dict['0th'][piexif.ImageIFD.Copyright] = "test"
-		exif_dict['0th'][piexif.ImageIFD.Artist] = "test"
-		stuff = piexif.load(filepath)
-		user_comment = piexif.helper.UserComment.load(stuff["Exif"][piexif.ExifIFD.UserComment])
-		exif_dict["Exif"][piexif.ExifIFD.UserComment] = piexif.helper.UserComment.dump(user_comment)
-
-				 
-		exif_bytes = piexif.dump(exif_dict)
+	
+	new_metadata = get_exif_data(new_filepath)
+	if new_metadata is not 0:
+		# Read metadata from old image
+		old_metadata = piexif.load(filepath)
+		user_comment = piexif.helper.UserComment.load(old_metadata["Exif"][piexif.ExifIFD.UserComment])
+		# Write metadata to new image
+		new_metadata["Exif"][piexif.ExifIFD.UserComment] = piexif.helper.UserComment.dump(user_comment)
+		exif_bytes = piexif.dump(new_metadata)
 		piexif.insert(exif_bytes, new_filepath)
 	else:
-		print("Was not able to open " + filepath)
+		print("Was not able to open " + new_filepath)
+
 	print(counter)
 	counter += 1
-	with open('resize_info.txt', 'w') as file:
-		file.write(str(file))
+	with open('resize_info.txt', 'w') as f:
+		f.write(file)
