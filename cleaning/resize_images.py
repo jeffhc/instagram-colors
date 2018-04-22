@@ -38,12 +38,17 @@ for file in onlyfiles:
 	new_metadata = get_exif_data(new_filepath)
 	if new_metadata is not 0:
 		# Read metadata from old image
-		old_metadata = piexif.load(filepath)
-		user_comment = piexif.helper.UserComment.load(old_metadata["Exif"][piexif.ExifIFD.UserComment])
-		# Write metadata to new image
-		new_metadata["Exif"][piexif.ExifIFD.UserComment] = piexif.helper.UserComment.dump(user_comment)
-		exif_bytes = piexif.dump(new_metadata)
-		piexif.insert(exif_bytes, new_filepath)
+		try:
+			old_metadata = piexif.load(filepath)
+			user_comment = piexif.helper.UserComment.load(old_metadata["Exif"][piexif.ExifIFD.UserComment])
+			# Write metadata to new image
+			new_metadata["Exif"][piexif.ExifIFD.UserComment] = piexif.helper.UserComment.dump(user_comment)
+			exif_bytes = piexif.dump(new_metadata)
+			piexif.insert(exif_bytes, new_filepath)
+		except:
+			print("Metadata Error for " + filepath)
+			with open('metadata_error_log.txt', 'a') as f:
+				f.write(filepath+"\n")
 	else:
 		print("Was not able to open " + new_filepath)
 
