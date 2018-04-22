@@ -12,40 +12,50 @@ IMAGE_DATA_DIR = 'scaled_photos'
 onlyfiles = [f for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
 
 
-all_data = {
-	
-	"photos": [],
-	"likes": [],
-	"ratio": [],
-	"url": [],
-	"user": []
-}
+pickle_count = 0
+pickle_limit = 42
 
-for imgname in onlyfiles:
-	filepath = join(IMAGE_DATA_DIR, imgname)
-	
-	try:
-		img = Image.open(filepath)
-		img.load()
-		data = np.asarray( img, dtype="int32" )
-		all_data["photos"].append(data)
+# We pickle 1000 images per file, 42 files (42000 images total)
+while pickle_count < pickle_limit:
 
-		exif_dict = piexif.load(filepath)
-		user_comment = piexif.helper.UserComment.load(exif_dict["Exif"][piexif.ExifIFD.UserComment])
-		metadata = json.loads(user_comment)
+	all_data = {
 		
-		all_data["likes"].append(metadata["likes"])
-		all_data["ratio"].append(metadata["ratio"])
-		all_data["url"].append(metadata["url"])
-		all_data["user"].append(metadata["user"])
-	except:
-		print("Could not pickle: " + filepath)
-		with open('pickle_error_log.txt', 'a') as f:
-			f.write(filepath + '\n')
+		"photos": [],
+		"likes": [],
+		"ratio": [],
+		"url": [],
+		"user": []
+	}
+
+	lower = pickle_count * 1000
+	upper = (pickle_count + 1) * 1000
+	print(lower, upper)
+	for imgname in onlyfiles[lower:upper]:
+		filepath = join(IMAGE_DATA_DIR, imgname)
+		
+		try:
+			img = Image.open(filepath)
+			img.load()
+			data = np.asarray( img, dtype="int32" )
+			all_data["photos"].append(data)
+
+			exif_dict = piexif.load(filepath)
+			user_comment = piexif.helper.UserComment.load(exif_dict["Exif"][piexif.ExifIFD.UserComment])
+			metadata = json.loads(user_comment)
+			
+			all_data["likes"].append(metadata["likes"])
+			all_data["ratio"].append(metadata["ratio"])
+			all_data["url"].append(metadata["url"])
+			all_data["user"].append(metadata["user"])
+		except:
+			print("Could not pickle: " + filepath)
+			with open('pickle_error_log.txt', 'a') as f:
+				f.write(filepath + '\n')
 
 
-print("Done")
-pickle.dump(all_data, open("all_data.pickle", 'wb'))
+	pickle_count += 1
+	print("Done with %d000" % pickle_count)
+	pickle.dump(all_data, open("data_%s.pickle" & pickle_count, 'wb'))
 
 
 #data = pickle.load(open("all_data.pickle", 'rb'))
