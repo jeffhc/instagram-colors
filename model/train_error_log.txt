@@ -16,3 +16,9 @@ Could not load: ../cleaning/scaled_photos\cbindonesia_12_r.jpg
 Could not load: ../cleaning/scaled_photos\cbindonesia_10_r.jpg
 Could not load: ../cleaning/scaled_photos\cbindonesia_11_r.jpg
 Could not load: ../cleaning/scaled_photos\cbindonesia_12_r.jpg
+Could not load: ../cleaning/scaled_photos\cbindonesia_10_r.jpg
+Could not load: ../cleaning/scaled_photos\cbindonesia_11_r.jpg
+Could not load: ../cleaning/scaled_photos\cbindonesia_12_r.jpg
+Could not load: ../cleaning/scaled_photos\cbindonesia_10_r.jpg
+Could not load: ../cleaning/scaled_photos\cbindonesia_11_r.jpg
+Could not load: ../cleaning/scaled_photos\cbindonesia_12_r.jpg
