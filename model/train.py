@@ -11,17 +11,17 @@ from os import listdir, mkdir
 from os.path import isfile, join, exists
 
 VGG_PATH = 'imagenet-vgg-verydeep-19.mat'
-IMAGE_DATA_DIR = 'scaled_images'
-TOTAL_IMAGES = 42000
-BATCH_SIZE = 4200
+IMAGE_DATA_DIR = '../cleaning/scaled_photos'
+TOTAL_IMAGES = 12
+BATCH_SIZE = 3
 LEARNING_RATE = 1e-3
 
 
 def load_photos(array):
     # Takes a list of filenames, returns a dictionary with np.arrays() and metadata
     data = {
-        images: [],
-        likes: []
+        "images": [],
+        "likes": []
     }
     for filepath in array:
         try:
@@ -47,7 +47,7 @@ def chunks(array, chunk_size, mode):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(array), chunk_size):
         data = load_photos(array[i:i + chunk_size])
-        yield data['mode']
+        yield data[mode]
 
 def weights_variable(shape, name):
     return tf.Variable(tf.truncated_normal(shape=shape), name=name)
@@ -116,13 +116,13 @@ saver = tf.train.Saver()
 saver.save(sess, './tensorboard/checkpoint', 0)
 file_writer = tf.summary.FileWriter('tensorboard/', sess.graph)
 
+# Get all the filenames
+all_file_names = [join(IMAGE_DATA_DIR, f) for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
 
 for epoch in range(100000):
 
-    # Get all the filenames
-    all_file_names = [join(IMAGE_DATA_DIR, f) for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
-
-    for train_images, train_likes in zip(chunks(all_file_names, BATCH_SIZE, 'images'), chunks(all_train_likes, BATCH_SIZE, 'likes')):
+    
+    for train_images, train_likes in zip(chunks(all_file_names, BATCH_SIZE, 'images'), chunks(all_file_names, BATCH_SIZE, 'likes')):
         sess.run(train, feed_dict={images: train_images, likes: train_likes})
 
     if epoch % 100 == 0:
