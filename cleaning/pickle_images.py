@@ -33,7 +33,7 @@ while pickle_count < pickle_limit:
 
 	lower = pickle_count * 1000
 	upper = (pickle_count + 1) * 1000
-	print(lower, upper)
+	#print(lower, upper)
 	for imgname in onlyfiles[lower:upper]:
 		filepath = join(IMAGE_DATA_DIR, imgname)
 		
@@ -59,7 +59,7 @@ while pickle_count < pickle_limit:
 
 	pickle_count += 1
 	print("Done with %d000" % pickle_count)
-	pickle.dump(all_data, open(join(PICKLE_DIR, "data_%s.pickle" & pickle_count), 'wb'))
+	pickle.dump(all_data, open(join(PICKLE_DIR, "data_%d.pickle" % pickle_count), 'wb'))
 
 
 #data = pickle.load(open("all_data.pickle", 'rb'))

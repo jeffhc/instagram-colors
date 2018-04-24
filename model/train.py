@@ -6,20 +6,48 @@ import numpy as np
 import functools
 import imageio
 import pickle
-import os
 import sys
+from os import listdir, mkdir
+from os.path import isfile, join, exists
 
 VGG_PATH = 'imagenet-vgg-verydeep-19.mat'
-TOTAL_IMAGES = 12
-BATCH_SIZE = 3
+IMAGE_DATA_DIR = 'scaled_images'
+TOTAL_IMAGES = 42000
+BATCH_SIZE = 4200
 LEARNING_RATE = 1e-3
 
-all_data = pickle.load(open('all_data.pickle', 'rb'))
 
-def chunks(array, chunk_size):
+def load_photos(array):
+    # Takes a list of filenames, returns a dictionary with np.arrays() and metadata
+    data = {
+        images: [],
+        likes: []
+    }
+    for filepath in array:
+        try:
+            img = Image.open(filepath)
+            img.load()
+            rgb_data = np.asarray( img, dtype="int32" )
+            data["photos"].append(rgb_data)
+
+            exif_dict = piexif.load(filepath)
+            user_comment = piexif.helper.UserComment.load(exif_dict["Exif"][piexif.ExifIFD.UserComment])
+            metadata = json.loads(user_comment)
+            
+            data["likes"].append(metadata["likes"])
+            #all_data["ratio"].append(metadata["ratio"])
+            
+        except:
+            print("Could not load: " + filepath)
+            with open('train_error_log.txt', 'a') as f:
+                f.write("Could not load: " + filepath + '\n')
+    return data
+
+def chunks(array, chunk_size, mode):
     """Yield successive n-sized chunks from l."""
     for i in range(0, len(array), chunk_size):
-        yield array[i:i + chunk_size]
+        data = load_photos(array[i:i + chunk_size])
+        yield data['mode']
 
 def weights_variable(shape, name):
     return tf.Variable(tf.truncated_normal(shape=shape), name=name)
@@ -89,13 +117,12 @@ saver.save(sess, './tensorboard/checkpoint', 0)
 file_writer = tf.summary.FileWriter('tensorboard/', sess.graph)
 
 
-all_train_images = all_data['photos'][:TOTAL_IMAGES]
-all_train_likes = all_data['likes'][:TOTAL_IMAGES]
-#all_train_edge_images = np.reshape(all_data['grayedges'][:TOTAL_IMAGES], [TOTAL_IMAGES, 64, 64, 1]) # TODO: Why do we reshape this?
-#all_train_content_images = all_data['original'][:TOTAL_IMAGES]
-
 for epoch in range(100000):
-    for train_images, train_likes in zip(chunks(all_train_images, BATCH_SIZE), chunks(all_train_likes, BATCH_SIZE)):
+
+    # Get all the filenames
+    all_file_names = [join(IMAGE_DATA_DIR, f) for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
+
+    for train_images, train_likes in zip(chunks(all_file_names, BATCH_SIZE, 'images'), chunks(all_train_likes, BATCH_SIZE, 'likes')):
         sess.run(train, feed_dict={images: train_images, likes: train_likes})
 
     if epoch % 100 == 0:
@@ -113,7 +140,7 @@ for epoch in range(100000):
 
             # Save results and originals
             try:
-                os.mkdir('results/epoch%s' % epoch)
+                mkdir('results/epoch%s' % epoch)
             except:
                 pass
             with open('results/epoch%s/RESULT%s.txt' % (epoch, i), 'a') as f:
