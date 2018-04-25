@@ -1,3 +1,7 @@
 model/imagenet-vgg-verydeep-19.mat
 model/__pycache__
 model/tensorboard
+all_data.pickle
+
+model/logs
+model/results

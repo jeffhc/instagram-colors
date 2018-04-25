@@ -11,8 +11,8 @@ import piexif, piexif.helper, json
 from os import listdir, mkdir
 from os.path import isfile, join, exists
 
-VGG_PATH = 'imagenet-vgg-verydeep-19.mat'
-IMAGE_DATA_DIR = '../cleaning/scaled_photos'
+VGG_PATH = 'imagenet-vgg-verydeep-19.mat' # did not use
+IMAGE_DATA_DIR = '../cleaning/scaled_photos' # images pre-stretched to all be of same size
 TOTAL_IMAGES = 12
 BATCH_SIZE = 4
 LEARNING_RATE = 1e-3
@@ -20,10 +20,10 @@ LEARNING_RATE = 1e-3
 
 def load_photos(array):
 	# Takes a list of filenames, returns a dictionary with np.arrays() and metadata
-	data = {
+	data = { 
 		"images": [],
 		"likes": []
-	}
+	} 
 	for filepath in array:
 		#try:
 		img = Image.open(filepath)
@@ -62,7 +62,7 @@ images = tf.placeholder(tf.float32, shape=(None, 640, 640, 3), name='images')
 likes = tf.placeholder(tf.float32, shape=(None, 1), name='likes')
 
 ### Preprocess images using VGG. Code borrowed and modified from https://github.com/lengstrom/fast-style-transfer
-#images_pre = vgg.preprocess(images) # TODO: Wtf is this doing? or rather... Is this the mean of the VGG dataset or OUR dataset?
+#images_pre = vgg.preprocess(images) # TODO: What is this doing? or rather... Is this the mean of the VGG dataset or OUR dataset?
 #net = vgg.net(VGG_PATH, images_pre)
 #images_vgg = net['relu5_4'] # TODO: Has the image been through the VGG_net?
 #print(images_vgg.shape)
@@ -81,7 +81,7 @@ def general_convolution(input, layer_name):
 
 	return tf.nn.relu(convolution + biases)
 
-# Convolve: After convolving, shape is (?, 40, 40, 3)
+# Convolve: After convolving, shape is (?, 40, 40, 3) --> 4800 pixels
 relu1 = general_convolution(images, 'relu1')
 relu2 = general_convolution(relu1, 'relu2')
 relu3 = general_convolution(relu2, 'relu3')
@@ -92,16 +92,19 @@ flattended_size = np.prod(relu4.shape[1:])
 relu4 = tf.reshape(relu4, [-1, flattended_size])
 
 # Fully connected network to produce number of likes
+	# Image --> network
 fc_weights0 = tf.Variable(tf.truncated_normal([int(flattended_size), 5000]), name='fc_weights0')
 fc_biases0 = tf.Variable(tf.constant(0.1, shape=(5000,)), name='fc_biases0')
 fc0 = tf.nn.relu(tf.matmul(relu4, fc_weights0) + fc_biases0)
 
+	# network --> likes
 fc_weights1 = tf.Variable(tf.truncated_normal([int(fc0.shape[1]), 1]), name='fc_weights1')
 fc_biases1 = tf.Variable(tf.constant(0.1, shape=(1,)), name='fc_biases1')
 output_likes = tf.matmul(fc0, fc_weights1) + fc_biases1
 
 # Define cost
 cost = tf.losses.mean_squared_error(output_likes, likes) # TODO: Does order matter?
+tf.summary.scalar('cost', cost)
 
 # Define training operation
 train = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cost)
@@ -111,7 +114,8 @@ sess.run(tf.global_variables_initializer())
 
 saver = tf.train.Saver()
 saver.save(sess, './tensorboard/checkpoint', 0)
-file_writer = tf.summary.FileWriter('tensorboard/', sess.graph)
+file_writer = tf.summary.FileWriter('logs/', sess.graph)
+
 
 # Get all the filenames
 all_file_names = [join(IMAGE_DATA_DIR, f) for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
@@ -130,20 +134,22 @@ for epoch in range(100000):
 		# Evaluate Performance
 		print('Epoch: %s of 100000' % epoch)
 		print('Cost: %s' % sess.run(cost, feed_dict={images: train_images, likes: train_likes}))
+		with open('cost_results.csv', 'a') as f:
+			f.write(sess.run(cost, feed_dict={images: train_images, likes: train_likes}))
+			f.write('\n')
 		
 		# Save results images
 		results = sess.run(output_likes, feed_dict={images: train_images})
-		print(results)
-		#for i in range(10): # TODO: Why is this loop here?
-		#	result_likes = results[i]
 
-			# Save results and originals
-		#	try:
-		#		mkdir('results')
-		#		mkdir('results/epoch%s' % epoch)
-		#	except:
-		#		pass
-		#	with open('results/epoch%s/RESULT%s.txt' % (epoch, i), 'a') as f:
-		#		f.write(result_likes + '\n')
-		#	with open('results/epoch%s/ORIGINAL%s.txt' % (epoch, i), 'a') as f:
-		#		f.write(train_likes[i] + '\n')
+		# Save results and originals
+		try:
+			mkdir('results')
+		except:
+			pass
+		with open('results/epoch_%s.txt' % epoch, 'w') as f:
+			f.write(str(results) + '\n')
+
+		# Tensorboard graphing
+		merged = tf.summary.merge_all()
+		summary = sess.run(merged , feed_dict={images: train_images, likes: train_likes})
+		file_writer.add_summary(summary, epoch)
