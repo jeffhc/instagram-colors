@@ -119,6 +119,7 @@ file_writer = tf.summary.FileWriter('logs/', sess.graph)
 
 # Get all the filenames
 all_file_names = [join(IMAGE_DATA_DIR, f) for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
+all_file_names = all_file_names[:TOTAL_IMAGES]
 
 for epoch in range(100000):
 
@@ -135,7 +136,7 @@ for epoch in range(100000):
 		print('Epoch: %s of 100000' % epoch)
 		print('Cost: %s' % sess.run(cost, feed_dict={images: train_images, likes: train_likes}))
 		with open('cost_results.csv', 'a') as f:
-			f.write(sess.run(cost, feed_dict={images: train_images, likes: train_likes}))
+			f.write(str(sess.run(cost, feed_dict={images: train_images, likes: train_likes})))
 			f.write('\n')
 		
 		# Save results images
