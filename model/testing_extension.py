@@ -1,4 +1,4 @@
-import vgg
+
 from PIL import Image, ImageFilter
 from pprint import pprint
 import tensorflow as tf
@@ -12,7 +12,7 @@ from os import listdir, mkdir
 from os.path import isfile, join, exists
 
 VGG_PATH = 'imagenet-vgg-verydeep-19.mat' # did not use
-IMAGE_DATA_DIR = '../cleaning/scaled_photos' # images pre-stretched to all be of same size
+IMAGE_DATA_DIR = 'scaled_photos' # images pre-stretched to all be of same size
 TOTAL_IMAGES = 12
 BATCH_SIZE = 4
 LEARNING_RATE = 1e-3
@@ -110,14 +110,16 @@ train = tf.train.AdamOptimizer(LEARNING_RATE).minimize(cost)
 sess = tf.Session()
 
 # Add ops to save and restore all the variables.
-new_saver = tf.train.import_meta_graph('checkpoint-2945.meta')
-new_saver.restore(sess, tf.train.latest_checkpoint('./'))
+saver = tf.train.Saver()
+saver.restore(sess, "./tensorboard/checkpoint-2945")
 print("Model restored.")
 
 
 # Get all the filenames
 all_file_names = [join(IMAGE_DATA_DIR, f) for f in listdir(IMAGE_DATA_DIR) if isfile(join(IMAGE_DATA_DIR, f))]
 all_file_names = all_file_names[:TOTAL_IMAGES]
+
+test_image = "scaled_photos/cbindonesia_1_r.jpg"
 
 for epoch in range(100000):
 
@@ -131,3 +133,8 @@ for epoch in range(100000):
 		# Evaluate Performance
 		print('Epoch: %s of 100000' % epoch)
 		print('Cost: %s' % sess.run(cost, feed_dict={images: train_images, likes: train_likes}))
+		
+
+		test_likes = np.array(load_photos([test_image])['likes'])
+		test_likes = np.reshape(test_likes, [len(test_likes), 1])
+		print('TEST IMAGE: %s' % sess.run(output_likes, feed_dict={images:load_photos([test_image])['images'], likes:test_likes}))
