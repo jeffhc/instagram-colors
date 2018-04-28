@@ -1,7 +1,8 @@
 model/imagenet-vgg-verydeep-19.mat
-model/__pycache__
-model/tensorboard
+model/__pycache__/
+model/tensorboard/
 all_data.pickle
 
-model/logs
-model/results
+model/logs/
+model/results/
+extension/checkpoint/
