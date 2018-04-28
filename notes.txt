@@ -1,1 +1,19 @@
 user skittlespam was removed between profile collection and photo downloading.
+
+
+TODO: 
+
+- Project extension
+
+- Fix photo sample (not the first 1000, but 1 photo from 1000 different users)
+
+- Continue training
+
+- Design system for logging... (cost_results.csv, tensorboard, project_checkpoint), such that we can easily
+pick up training where we left off.
+
+- Try using like ratios
+
+- VGG?
+
+- Clean up directory tree
