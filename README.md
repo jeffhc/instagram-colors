@@ -1,2 +1,2 @@
 # instagram-colors
-Model for correlating Instagram post image styles and colors with number of likes and other meta-data
+Convolutional neural model for correlating Instagram post image content with number of likes and other meta-data
