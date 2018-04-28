@@ -6,3 +6,7 @@ all_data.pickle
 model/logs/
 model/results/
 extension/checkpoint/
+extension/project_checkpoint/checkpoint
+extension/project_checkpoint/checkpoint-2945.data-00000-of-00001
+extension/project_checkpoint/checkpoint-2945.index
+extension/project_checkpoint/checkpoint-2945.meta
