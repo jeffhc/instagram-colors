@@ -9,9 +9,9 @@ import pickle
 import sys
 import piexif, piexif.helper, json
 from os import listdir, mkdir
-from os.path import isfile, join, exists
+from os.path import isfile, join, exists, isdir
 
-VGG_PATH = 'imagenet-vgg-verydeep-19.mat' # did not use
+
 IMAGE_DATA_DIR = 'scaled_photos' # images pre-stretched to all be of same size
 TOTAL_IMAGES = 1000
 BATCH_SIZE = 100
@@ -25,7 +25,6 @@ def load_photos(array):
 		"likes": []
 	} 
 	for filepath in array:
-		#try:
 		img = Image.open(filepath)
 		img.load()
 		rgb_data = np.asarray( img, dtype="int32" )
@@ -36,12 +35,9 @@ def load_photos(array):
 		metadata = json.loads(user_comment)
 		
 		data["likes"].append(metadata["likes"])
-			#all_data["ratio"].append(metadata["ratio"])
-			
-		#except:
-		 #   print("Could not load: " + filepath)
-		  #  with open('train_error_log.txt', 'a') as f:
-		   #	 f.write("Could not load: " + filepath + '\n')
+
+	data['likes'] = np.array(data['likes'])
+	data['likes'] = np.reshape(data['likes'], [len(data['likes']), 1])
 	return data
 
 def chunks(array, chunk_size, mode):
@@ -61,11 +57,6 @@ def biases_variable(shape, name):
 images = tf.placeholder(tf.float32, shape=(None, 640, 640, 3), name='images')
 likes = tf.placeholder(tf.float32, shape=(None, 1), name='likes')
 
-### Preprocess images using VGG. Code borrowed and modified from https://github.com/lengstrom/fast-style-transfer
-#images_pre = vgg.preprocess(images) # TODO: What is this doing? or rather... Is this the mean of the VGG dataset or OUR dataset?
-#net = vgg.net(VGG_PATH, images_pre)
-#images_vgg = net['relu5_4'] # TODO: Has the image been through the VGG_net?
-#print(images_vgg.shape)
 
 # Take last layer of net and convolve it
 def general_convolution(input, layer_name):
@@ -113,7 +104,11 @@ sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
 saver = tf.train.Saver()
-saver.save(sess, './tensorboard/checkpoint', 0)
+if isdir('project_checkpoint'):
+	saver.restore(sess, "./project_checkpoint/checkpoint-2945")
+	print("Model restored.")
+else:
+	saver.save(sess, './tensorboard/checkpoint', 0)
 file_writer = tf.summary.FileWriter('logs/', sess.graph)
 
 
@@ -124,8 +119,6 @@ all_file_names = all_file_names[:TOTAL_IMAGES]
 for epoch in range(100000):
 
 	for train_images, train_likes in zip(chunks(all_file_names, BATCH_SIZE, 'images'), chunks(all_file_names, BATCH_SIZE, 'likes')):
-		train_likes = np.array(train_likes)
-		train_likes = np.reshape(train_likes, [len(train_likes), 1])
 		sess.run(train, feed_dict={images: train_images, likes: train_likes})
 
 	if epoch % 5 == 0:
@@ -138,17 +131,6 @@ for epoch in range(100000):
 		with open('cost_results.csv', 'a') as f:
 			f.write(str(sess.run(cost, feed_dict={images: train_images, likes: train_likes})))
 			f.write('\n')
-		
-		# Save results images
-		results = sess.run(output_likes, feed_dict={images: train_images})
-
-		# Save results and originals
-		try:
-			mkdir('results')
-		except:
-			pass
-		with open('results/epoch_%s.txt' % epoch, 'w') as f:
-			f.write(str(results) + '\n')
 
 		# Tensorboard graphing
 		merged = tf.summary.merge_all()
